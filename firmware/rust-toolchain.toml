@@ -1,0 +1,4 @@
+# Xtensa targets need the espup-installed "esp" toolchain (Rust fork with
+# the xtensa backend): `espup install`, then `. ~/export-esp.sh`.
+[toolchain]
+channel = "esp"

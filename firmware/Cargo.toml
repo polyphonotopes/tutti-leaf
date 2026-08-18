@@ -1,0 +1,43 @@
+[package]
+name = "tutti-leaf-fw"
+version = "0.1.0"
+authors = ["Micah Fitch <fitchmicah@gmail.com>"]
+edition = "2021"
+resolver = "2"
+rust-version = "1.82"
+
+[[bin]]
+name = "tutti-leaf-fw"
+path = "src/main.rs"
+harness = false # do not use the built-in cargo test harness -> resolve rust-analyzer errors
+
+[profile.release]
+opt-level = "s"
+
+[profile.dev]
+debug = true # Symbols are nice, and they don't increase the size on Flash
+opt-level = "z"
+
+[dependencies]
+log = "0.4"
+anyhow = "1"
+# std is a default feature of all three esp-idf crates.
+esp-idf-svc = "0.52.1"
+esp-idf-hal = "0.46.2"
+esp-idf-sys = "0.37.2"
+
+[build-dependencies]
+embuild = "0.33.3"
+
+[package.metadata.esp-idf-sys]
+esp_idf_version = "v5.5.3"
+
+# AMY, built as a regular ESP-IDF component (components/amy vendors the C
+# sources; see components/amy/CMakeLists.txt for the curated SRCS list).
+[[package.metadata.esp-idf-sys.extra_components]]
+component_dirs = ["components/amy"]
+# The Rust side uses a hand-written FFI (src/amy_ffi.rs) over three flat C
+# symbols, so no bindgen pass is needed. To generate bindings instead,
+# uncomment (they'd land in esp_idf_sys::amy):
+# bindings_header = "components/amy/include/amy_leaf.h"
+# bindings_module = "amy"

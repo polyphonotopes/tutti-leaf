@@ -1,0 +1,22 @@
+[build]
+target = "xtensa-esp32-espidf"
+
+[target.xtensa-esp32-espidf]
+linker = "ldproxy"
+runner = "espflash flash --monitor"
+rustflags = ["--cfg", "espidf_time64"]
+
+[unstable]
+build-std = ["std", "panic_abort"]
+
+[env]
+MCU = "esp32"
+# Keep in sync with [package.metadata.esp-idf-sys] esp_idf_version in Cargo.toml.
+# v5.5.3 is the esp-idf-template default (known-good with esp-idf-sys 0.37).
+ESP_IDF_VERSION = "v5.5.3"
+# ESP-IDF checkout + toolchain live in <workspace>/.embuild
+ESP_IDF_TOOLS_INSTALL_DIR = "workspace"
+
+# Uncomment this if you have moved the target dir by setting CARGO_TARGET_DIR or similar.
+# Required for now due to embuild limitations.
+#CARGO_WORKSPACE_DIR = { value = "", relative = true }

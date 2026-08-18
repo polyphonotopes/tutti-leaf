@@ -1,0 +1,22 @@
+# Rust / cargo
+/firmware/target
+/firmware/**/target
+Cargo.lock.bak
+
+# esp-idf-sys / embuild build products (IDF is fetched here on first build)
+.embuild/
+/firmware/.embuild/
+
+# espup env dump (lives in $HOME, but ignore if a dev drops a copy here)
+export-esp.sh
+
+# direnv
+.direnv/
+
+# editor / OS
+*.swp
+.DS_Store
+
+# nix
+result
+result-*

@@ -1,0 +1,61 @@
+# Sonocotta Amped-ESP32-Plus: ESP32-D0WD-V3 (classic, LX6 x2) in a
+# WROVER-E-style module — 8 MB flash + 8 MB PSRAM, PCM5122 I2S DAC.
+# ESP-IDF v5.5.x kconfig keys.
+
+#
+# CPU
+#
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ=240
+
+#
+# Flash: 8 MB, custom partition table
+#
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="8MB"
+CONFIG_ESPTOOLPY_FLASHMODE_DIO=y
+CONFIG_ESPTOOLPY_FLASHFREQ_80M=y
+# Built-in single-app-large table: nvs + phy_init + one big factory app. A
+# custom partitions.csv is NOT portable under esp-idf-sys (it resolves the
+# filename relative to the cmake build-out dir, not the project), so use a
+# preset until custom partitions are actually needed — nvs (for the identity
+# key) is already in this table.
+CONFIG_PARTITION_TABLE_SINGLE_APP_LARGE=y
+
+#
+# PSRAM (classic-ESP32 SPIRAM keys). Note: the ESP32 can only map 4 MB of
+# the 8 MB chip; the upper 4 MB needs the himem API (CONFIG_SPIRAM_BANKSWITCH_ENABLE),
+# which we leave off for now.
+#
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_TYPE_AUTO=y
+CONFIG_SPIRAM_SPEED_80M=y
+CONFIG_SPIRAM_BOOT_INIT=y
+CONFIG_SPIRAM_USE_MALLOC=y
+# Small allocations stay in internal RAM; AMY explicitly steers its bulk
+# buffers to PSRAM via MALLOC_CAP_SPIRAM (see components/amy/amy_leaf.c).
+CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=16384
+# Keep a healthy internal-RAM reserve for DMA (I2S descriptors) and task stacks.
+CONFIG_SPIRAM_MALLOC_RESERVE_INTERNAL=49152
+
+#
+# Stacks. Rust needs more main-task stack than C (template default is 3 K);
+# spawned Rust threads get PTHREAD_TASK_STACK_SIZE_DEFAULT unless overridden
+# with std::thread::Builder::stack_size.
+#
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=20000
+CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE=4096
+CONFIG_FREERTOS_IDLE_TASK_STACKSIZE=4096
+CONFIG_PTHREAD_TASK_STACK_SIZE_DEFAULT=8192
+
+#
+# 1 ms tick: AMY's fill-buffer task paces itself with vTaskDelay(1) when the
+# I2S DMA write doesn't block; at the default 100 Hz tick that stall is 10 ms
+# (more than an entire 5.8 ms audio block).
+#
+CONFIG_FREERTOS_HZ=1000
+
+# AMY pins its fill-buffer task (which parks inside the I2S DMA write) to
+# core 1 at ESP_TASK_PRIO_MAX-1; under heavy render load the core-1 idle task
+# can starve, which is expected — don't let the task WDT scream about it.
+CONFIG_ESP_TASK_WDT_CHECK_IDLE_TASK_CPU1=n
