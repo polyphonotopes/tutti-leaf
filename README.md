@@ -17,6 +17,9 @@ Sonocotta **Amped-ESP32-Plus** — classic dual-core Xtensa LX6 (**ESP32-D0WD-V3
 
 ## Quickstart (macOS or Linux)
 
+New to Nix / ESP32? [`docs/onboarding.md`](docs/onboarding.md) is a gentle,
+step-by-step macOS walk-through. The short version:
+
 You need [Nix](https://nixos.org/download) with flakes. Everything else comes from the
 dev shell.
 
